@@ -1,0 +1,7 @@
+/data/images
+/data/labels
+/data/8examples.csv
+/data/100examples.csv
+/data/test.csv
+/data/train.csv
+/dataset.ipynb
