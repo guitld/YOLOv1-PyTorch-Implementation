@@ -43,9 +43,9 @@ class Yolo(nn.Module):
             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
 
             ConvolutionalBlock(in_channels=1024, out_channels=512, kernel_size=1, stride=1, padding=0),
-            ConvolutionalBlock(in_channels=512, out_channels=1024, kernel_size=3, stride=1, padding=2),
+            ConvolutionalBlock(in_channels=512, out_channels=1024, kernel_size=3, stride=1, padding=1),
             ConvolutionalBlock(in_channels=1024, out_channels=512, kernel_size=1, stride=1, padding=0),
-            ConvolutionalBlock(in_channels=512, out_channels=1024, kernel_size=3, stride=1, padding=2),
+            ConvolutionalBlock(in_channels=512, out_channels=1024, kernel_size=3, stride=1, padding=1),
             ConvolutionalBlock(in_channels=1024, out_channels=1024, kernel_size=3, stride=1, padding=1),
             ConvolutionalBlock(in_channels=1024, out_channels=1024, kernel_size=3, stride=2, padding=1),
             ConvolutionalBlock(in_channels=1024, out_channels=1024, kernel_size=3, stride=1, padding=1),
@@ -54,14 +54,14 @@ class Yolo(nn.Module):
 
         self.dense_net = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(1024 * (grid_size**2), 4096),
+            nn.Linear(1024 * (grid_size**2), 64),
             nn.Dropout(0.5),
             nn.LeakyReLU(0.1),
-            nn.Linear(4096, (grid_size**2) * (n_classes + n_boxes * 5))
+            nn.Linear(64, (grid_size**2) * (n_classes + n_boxes * 5))
         )
 
     def forward(self, x):
         x = self.darknet(x)
         x = torch.flatten(x, start_dim=1)
-        x = self.dense_layers(x)
+        x = self.dense_net(x)
         return x

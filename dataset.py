@@ -20,6 +20,7 @@ class PascalVOCDataset(torch.utils.data.Dataset):
     """
     def __init__(self, filenames_path, img_path, label_path, grid_size=7, n_boxes=2, n_classes=20, transform=None):
         self.filenames  = pd.read_csv(filenames_path)
+        self.filenames  = self.filenames.iloc[:len(self.filenames)//2] 
         self.img_path   = img_path
         self.label_path = label_path
         self.transform  = transform
@@ -42,19 +43,21 @@ class PascalVOCDataset(torch.utils.data.Dataset):
                 
                 output_matrix = torch.zeros((self.grid_size, self.grid_size, self.n_classes + 5 * self.n_boxes))
         
+                # The label as it is in the original dataset representes the coordinates of the object in the context
+                # of the full image. This loop converts it to be relative to each cell of the grid
                 for box in boxes:
                     class_label, x, y, width, height = box
-                    # cell = (i, j)
+                    # this defines the row and column of the cell in the 7x7 grid relative to the coordinates
                     cell = (int(self.grid_size * y), int(self.grid_size * x))
-                    # cell_coords = (y, x)
+                    # cell_coords are the coordinates of the object relative to the cell
                     cell_coords = (self.grid_size * y - cell[0], self.grid_size * x - cell[1])
                     cell_shape = (width * self.grid_size, height * self.grid_size)
 
-
+                    # Checks if a previous object was already detected in that cell
                     if output_matrix[cell[0], cell[1], 20] == 0:
                         output_matrix[cell[0], cell[1], 20] = 1
-                        box_coords = torch.tensor([cell_coords[1], cell_coords[0], cell_shape[0], cell_shape[1]])
-                        output_matrix[cell[0], cell[1], 21:25] = box_coords
+                        # Box coordinates in the cell
+                        output_matrix[cell[0], cell[1], 21:25] = torch.tensor([cell_coords[1], cell_coords[0], cell_shape[0], cell_shape[1]])
                         output_matrix[cell[0], cell[1], class_label] = 1
                     
                 instances.append((row['image'], output_matrix))
