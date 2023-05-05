@@ -31,12 +31,4 @@ def iou(pred_box, true_box):
     pred_area = area(pred_bounds)
     true_area = area(true_bounds)
 
-    return intersection_area / (pred_area + true_area - intersection_area)
-
-# def nms(boxes, iou_thr, threshold):
-#     boxes = [box for box in boxes if box[1] > threshold]
-#     boxes = sorted(boxes, key=lambda x: x[1], reverse=True)
-#     boxes_nms = []
-#     while boxes:
-#         box = boxes.pop(0)
-#         b
+    return intersection_area / (pred_area + true_area - intersection_area) 
